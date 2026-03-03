@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "KGTU Oto Bot",
-  "version": "1.0",
-  "description": "BBB poll automation",
+  "name": "BBB Poll Observer (Research)",
+  "version": "1.0.0",
+  "description": "Experimental DOM-based active poll panel detection for BBB-like SPAs.",
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
