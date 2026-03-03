@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "KGTU Oto Bot",
+  "version": "1.0",
+  "description": "BBB poll automation",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "all_frames": true,
+      "js": ["content.js"]
+    }
+  ]
+}
