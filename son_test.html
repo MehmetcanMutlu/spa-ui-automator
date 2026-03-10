@@ -2,73 +2,134 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>BBB Yeni Sistem Simülasyonu</title>
+    <title>BBB Eklenti Zeka Testi</title>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 0; background: #f0f4f8; display: flex; height: 100vh; }
         
-        /* Sol Menü (Eklenti burayı GÖRMEMELİ) */
-        .left-menu { width: 250px; background: white; border-right: 1px solid #ccc; padding: 15px; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
-        .left-menu h4 { color: #333; margin-bottom: 5px; }
-        .old-btn { display: block; width: 100%; margin: 5px 0; padding: 8px; background: #e9ecef; border: 1px solid #ccc; text-align: left; color: #555; }
-
-        /* Ana İçerik */
         .main-content { flex: 1; padding: 40px; }
-        .btn-teacher { padding: 15px 30px; font-size: 18px; cursor: pointer; background: #d9534f; color: white; border: none; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-teacher { padding: 15px 25px; font-size: 16px; cursor: pointer; color: white; border: none; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-right: 15px; }
+        .btn-test-1 { background: #d9534f; }
+        .btn-test-2 { background: #f0ad4e; }
 
-        /* Sağ Alttaki Aktif Anket (Eklenti burayı YAKALAMALI) */
+        /* Başarı Sonuç Ekranı */
+        #sonucEkrani { 
+            display: none; margin-top: 30px; padding: 20px; 
+            background: #28a745; color: white; font-size: 18px; 
+            border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            font-weight: bold; text-align: center; max-width: 500px;
+        }
+
+        /* Sağ Alttaki Aktif Anket Kutusu */
         .active-poll {
             position: fixed; bottom: 20px; right: 20px;
-            width: 320px; background: white; border: 1px solid #0056b3;
-            padding: 15px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            width: 320px; background: white; border: 1px solid #e0e0e0;
+            padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-family: Arial, sans-serif;
         }
-        .poll-title { font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #333; }
-        .poll-option { display: block; width: 100%; margin: 8px 0; padding: 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; text-align: left; }
+        .poll-title { font-weight: bold; font-size: 15px; margin-bottom: 5px; color: #000; }
+        .poll-question { font-size: 14px; margin-bottom: 15px; color: #444; }
+        
+        /* Şık Butonları */
+        .poll-option { display: block; width: 100%; margin: 8px 0; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; text-align: left; transition: 0.2s; }
         .poll-option:hover { background: #0056b3; }
         
-        /* Eklentinin aradığı sihirli yazı */
-        .poll-warning { font-size: 11px; color: #666; margin-top: 15px; display: block; }
+        /* Metin Kutusu ve Gönder Butonu */
+        .poll-input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #6699ff; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        .poll-input:focus { outline: 2px solid #0056b3; }
+        
+        .submit-btn { display: block; width: 100%; padding: 12px; background: #5c85d6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .submit-btn:disabled { background: #9cb3e6; cursor: not-allowed; }
+        
+        .poll-warning { font-size: 11px; color: #000; font-weight: bold; margin-top: 15px; display: block; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="left-menu">
-        <h4>Oylama sorusu</h4>
-        <p style="font-size: 12px; color: #666;">Geçmiş bir sorunun metni burada yazıyor...</p>
-        <button class="old-btn">1: 6 || 13%</button>
-        <button class="old-btn">2: 36 || 77%</button>
-    </div>
-
     <div class="main-content">
-        <h1>Eklenti Zeka Testi</h1>
-        <p>Eklenti sol menüdeki "Oylama sorusu" yazısına ve butonlara aldanmayacak. Kırmızı butona bastığında sağ altta açılacak olan GERÇEK kutuya odaklanacak.</p>
+        <h1>Bot Simülasyon Merkezi</h1>
+        <p>Aşağıdaki butonları kullanarak eklentinin iki farklı senaryoda nasıl çalıştığını test edebilirsin.</p>
         
-        <button class="btn-teacher" onclick="triggerPoll()">Hoca Anketi Başlat (Sağ Altta Açılır)</button>
+        <button class="btn-teacher btn-test-1" onclick="triggerMultipleChoice()">Çoktan Seçmeli Anket Aç</button>
+        <button class="btn-teacher btn-test-2" onclick="triggerOpenEnded()">Açık Uçlu (Metin) Anket Aç</button>
+
+        <div id="sonucEkrani"></div>
     </div>
 
     <script>
-        function triggerPoll() {
-            // Varsa eski kutuyu temizle
+        function clearOldPoll() {
             const oldPoll = document.querySelector('.active-poll');
             if (oldPoll) oldPoll.remove();
+        }
 
-            // Yeni aktif anket kutusu oluştur (BBB Mantığı)
+        function gosterSonuc(mesaj) {
+            const sonucDiv = document.getElementById('sonucEkrani');
+            sonucDiv.style.display = 'block';
+            sonucDiv.innerHTML = `✅ Sisteme İletilen Yanıt:<br><br><span style="font-size:24px; color:#ffeb3b;">${mesaj}</span>`;
+            
+            // 5 saniye sonra ekrandan sil
+            setTimeout(() => { sonucDiv.style.display = 'none'; }, 5000);
+        }
+
+        // 1. ÇOKTAN SEÇMELİ ANKET SİMÜLASYONU
+        function triggerMultipleChoice() {
+            clearOldPoll();
+            document.getElementById('sonucEkrani').style.display = 'none';
+
             const pollBox = document.createElement('div');
             pollBox.className = 'active-poll';
             pollBox.innerHTML = `
                 <div class="poll-title">Oylama sorusu</div>
-                <p style="font-size: 13px; margin-bottom: 15px;">You have 10 pigeons and 9 holes. What does...</p>
-                
-                <button class="poll-option" onclick="alert('Tebrikler! Eklenti A şıkkını seçti.')">Every hole contains exactly 1 pigeon</button>
-                <button class="poll-option" onclick="alert('Tebrikler! Eklenti B şıkkını seçti.')">At least one hole contains at least 2 pigeons</button>
-                <button class="poll-option" onclick="alert('Tebrikler! Eklenti C şıkkını seçti.')">At most one hole contains 2 pigeons</button>
-                
-                <button aria-label="Close" style="display: none;">Kapat</button>
-
+                <div class="poll-question">Which of the following is correct?</div>
+                <button class="poll-option" onclick="secimYapildi(this)">A: 10</button>
+                <button class="poll-option" onclick="secimYapildi(this)">B: 37</button>
+                <button class="poll-option" onclick="secimYapildi(this)">C: 6</button>
+                <button class="poll-option" onclick="secimYapildi(this)">D: 3</button>
                 <span class="poll-warning">Normal oylama. Sunucu yanıtınızı görebilir.</span>
             `;
-
             document.body.appendChild(pollBox);
-            console.log("Yeni anket kutusu DOM'a eklendi.");
+        }
+
+        // Çoktan seçmeli şıkka basıldığında tetiklenen olay
+        function secimYapildi(btn) {
+            gosterSonuc(btn.innerText);
+            clearOldPoll();
+        }
+
+        // 2. AÇIK UÇLU ANKET SİMÜLASYONU
+        function triggerOpenEnded() {
+            clearOldPoll();
+            document.getElementById('sonucEkrani').style.display = 'none';
+
+            const pollBox = document.createElement('div');
+            pollBox.className = 'active-poll';
+            pollBox.innerHTML = `
+                <div class="poll-title">Oylama sorusu</div>
+                <div class="poll-question">What is the string after we pump y twice?</div>
+                
+                <input type="text" id="cevapKutusu" class="poll-input" placeholder="Yanıtı yazın">
+                <button id="gonderButonu" class="submit-btn" disabled>Gönder</button>
+                
+                <span class="poll-warning">Normal oylama. Sunucu yanıtınızı görebilir.</span>
+            `;
+            document.body.appendChild(pollBox);
+
+            const inputKutusu = document.getElementById('cevapKutusu');
+            const btnGonder = document.getElementById('gonderButonu');
+
+            // Klavye algılayıcı
+            inputKutusu.addEventListener('input', function(e) {
+                if (e.target.value.length > 0) {
+                    btnGonder.disabled = false;
+                } else {
+                    btnGonder.disabled = true;
+                }
+            });
+
+            // Gönder Butonuna basıldığında tetiklenen olay
+            btnGonder.onclick = function() {
+                gosterSonuc(inputKutusu.value);
+                clearOldPoll();
+            };
         }
     </script>
 
